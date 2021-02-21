@@ -49,7 +49,7 @@ local callbackfn = function(bufnr)
     end
   end
 
-  if next(globals) == nil and not next(cglobal_state_globals[bufnr]) == nil then
+  if next(globals) == nil and next(cglobal_state_globals[bufnr]) ~= nil then
     dirty = true
   end
 
@@ -61,7 +61,7 @@ local callbackfn = function(bufnr)
     if next(globals) ~= nil then
       local keywords = key_concat(globals, " ")
       api.nvim_command('syntax keyword cGlobalVariable '..keywords);
-  end
+    end
   end
 end
 
