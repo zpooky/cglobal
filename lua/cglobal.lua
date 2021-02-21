@@ -5,7 +5,7 @@ local M = {}
 -- TODO: In this function replace `module-template` with the actual name of your module.
 function M.init()
   require "nvim-treesitter".define_modules {
-    module_template = {
+    cglobal = {
       module_path = "cglobal.internal",
       is_supported = function(lang)
         -- /queries/$lang/cglobal.scm

@@ -19,6 +19,16 @@ local function is_global(node)
   return res
 end
 
+local function key_concat(tab, sep)
+    local ctab = {}
+    local n =1
+    for k, _ in pairs(tab) do
+        ctab[n] = k
+        n = n + 1
+    end
+    return table.concat(ctab,sep)
+end
+
 local callbackfn = function(bufnr)
   -- TODO? no need to do anything when pum is open
   if vim.fn.pumvisible() == 1 then
@@ -32,24 +42,24 @@ local callbackfn = function(bufnr)
   for _, node in ipairs(matches) do
     if is_global(node.node) then
       local txt = utils.get_node_text(node.node)
-      if not dirty and not cglobal_state_globals[bufnr][txt] then
+      if not dirty and cglobal_state_globals[bufnr][txt] == nil then
         dirty = true
       end
-      table.insert(globals, txt)
+      globals[txt] = true
     end
   end
 
-  if globals.__len ~= cglobal_state_globals[bufnr].__len then
+  if next(globals) == nil and not next(cglobal_state_globals[bufnr]) == nil then
     dirty = true
   end
 
   if dirty then
-    if cglobal_state_globals[bufnr].__len > 0 then
+    if next(cglobal_state_globals[bufnr]) ~= nil then
       api.nvim_command('syntax clear cGlobalVariable');
     end
     cglobal_state_globals[bufnr] = globals
-    if globals.__len > 0 then
-      local keywords = table.concat(globals, " ")
+    if next(globals) ~= nil then
+      local keywords = key_concat(globals, " ")
       api.nvim_command('syntax keyword cGlobalVariable '..keywords);
   end
   end
