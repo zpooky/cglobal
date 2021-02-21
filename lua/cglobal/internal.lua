@@ -42,10 +42,12 @@ local callbackfn = function(bufnr)
   for _, node in ipairs(matches) do
     if is_global(node.node) then
       local txt = utils.get_node_text(node.node)[1]
-      if not dirty and cglobal_state_globals[bufnr][txt] == nil then
-        dirty = true
+      if txt ~= nil then
+        if not dirty and cglobal_state_globals[bufnr][txt] == nil then
+          dirty = true
+        end
+        globals[txt] = true
       end
-      globals[txt] = true
     end
   end
 
