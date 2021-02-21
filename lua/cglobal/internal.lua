@@ -21,12 +21,12 @@ end
 
 local function key_concat(tab, sep)
     local ctab = {}
-    local n =1
+    local n = 1
     for k, _ in pairs(tab) do
         ctab[n] = k
         n = n + 1
     end
-    return table.concat(ctab,sep)
+    return table.concat(ctab, sep)
 end
 
 local callbackfn = function(bufnr)
@@ -41,7 +41,7 @@ local callbackfn = function(bufnr)
   local matches = queries.get_capture_matches(bufnr, "@id", "cglobal")
   for _, node in ipairs(matches) do
     if is_global(node.node) then
-      local txt = utils.get_node_text(node.node)
+      local txt = utils.get_node_text(node.node)[1]
       if not dirty and cglobal_state_globals[bufnr][txt] == nil then
         dirty = true
       end
