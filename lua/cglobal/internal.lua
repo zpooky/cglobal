@@ -73,6 +73,8 @@ local function try_async (f, bufnr)
   return function()
     if cancel then return true end
     local async_handle;
+
+    -- TODO here we emit a background job for every change
     async_handle = vim.loop.new_async(
                     vim.schedule_wrap(
                       function()
@@ -92,6 +94,27 @@ function M.attach(bufnr, lang)
   cglobal_state_table[bufnr] = detachf;
   callbackfn(bufnr);
   -- on every change:
+
+-- TODO ~/sources/neovim/runtime/doc/treesitter.txt
+-- #1.
+-- <Create a parser for_ a buffer and a given language (if_ another plugin uses the
+-- same buffer/language combination, it will be safely reused) Use >
+--     parser = vim.treesitter.get_parser(bufnr, lang)
+--
+-- NB: to use the parser directly inside a |nvim_buf_attach| Lua callback, you must
+-- call get_parser() before you register your callback. But preferably parsing
+-- shouldnt be done directly in_ the change callback anyway as they will be very
+-- frequent. Rather a plugin that does any kind of analysis on a tree should use
+-- a timer to throttle too frequent updates.
+-- #2.
+--- Registers callbacks for the parser
+-- @param cbs An `nvim_buf_attach`-like table argument with the following keys :
+--  `on_bytes` : see `nvim_buf_attach`, but this will be called _after_ the parsers callback.
+--  !! `on_changedtree` : a callback that will be called every time the tree has syntactical changes.  it will only be passed one argument, that is a table of the ranges (as node ranges) that changed.
+--  `on_child_added` : emitted when a child is added to the tree.
+--  `on_child_removed` : emitted when a child is removed from the tree.
+--  function LanguageTree:register_cbs(cbs)
+
   api.nvim_buf_attach(bufnr, false, {on_lines = attachf});
 end
 
