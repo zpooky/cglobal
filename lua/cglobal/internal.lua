@@ -1,6 +1,5 @@
 local M = {}
 -- local set = require('Module:Set')
-local utils = require "nvim-treesitter.ts_utils"
 local queries = require "nvim-treesitter.query"
 local api = vim.api
 
@@ -8,8 +7,8 @@ local cglobal_state_table = {}
 
 local function is_global(node)
   local res = true
-  while node:parent() ~= nil do
-    if node:type() == "function_definition" then
+  while node ~= nil do
+    if node:type() == "function_definition" or node:type() == "ERROR" or node:type() == "compound_statement" then
       res = false
       break
     end
@@ -38,7 +37,7 @@ local callbackfn = function(bufnr)
   local matches = queries.get_capture_matches(bufnr, "@id", "cglobal")
   for _, node in ipairs(matches) do
     if is_global(node.node) then
-      local txt = utils.get_node_text(node.node)[1]
+      local txt = vim.treesitter.query.get_node_text(node.node, bufnr)
       if txt ~= nil then
         if not dirty and cglobal_state_table[bufnr].globals[txt] == nil then
           dirty = true
