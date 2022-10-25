@@ -27,40 +27,55 @@ local function key_concat(tab, sep)
   return table.concat(ctab, sep)
 end
 
-local callbackfn = function(bufnr)
+local function callbackfn(bufnr)
   -- TODO? no need to do anything when pum is open
   if vim.fn.pumvisible() == 1 then return; end
   local globals = {}
+  local l_globals = 0
   local dirty = false
 
   -- executes @id query from cglobal.scm??
   local matches = queries.get_capture_matches(bufnr, "@id", "cglobal")
   for _, node in ipairs(matches) do
-    if is_global(node.node) then
       local txt = vim.treesitter.query.get_node_text(node.node, bufnr)
-      if txt ~= nil then
-        if not dirty and cglobal_state_table[bufnr].globals[txt] == nil then
-          dirty = true
+      -- print("- "..txt)
+    if is_global(node.node) then
+      if txt ~= nil and string.len(txt) > 0 then
+        if txt ~= "__packed" and txt ~= "struct" and  txt ~= "typedef" then -- blacklist
+          -- print(": "..txt)
+          if cglobal_state_table[bufnr].globals == nil then
+            dirty = true
+          elseif not dirty and cglobal_state_table[bufnr].globals[txt] == nil then
+            dirty = true
+          end
+          -- print("- "..txt)
+          globals[txt] = true
+          l_globals = l_globals + 1
         end
-        globals[txt] = true
       end
     end
   end
 
-  if next(globals) == nil and next(cglobal_state_table[bufnr].globals) ~= nil then
-    dirty = true
-  end
-
   if dirty then
-    if next(cglobal_state_table[bufnr].globals) ~= nil then
+    if cglobal_state_table[bufnr].globals ~= nil then
       -- print("clear")
       api.nvim_command('syntax clear cGlobalVariable');
     end
-    cglobal_state_table[bufnr].globals = globals
-    if next(globals) ~= nil then
+    if l_globals > 0 then
+      cglobal_state_table[bufnr].globals = globals
+    else
+      cglobal_state_table[bufnr].globals = nil
+    end
+    if l_globals > 0 then
       -- print("add")
       local keywords = key_concat(globals, " ")
-      api.nvim_command('syntax keyword cGlobalVariable ' .. keywords);
+      -- print(globals)
+      -- print(l_globals)
+      -- print('syntax keyword cGlobalVariable ' .. keywords)
+      if api.nvim_command('syntax keyword cGlobalVariable ' .. keywords) then
+      else
+        -- print('ERROR: syntax keyword cGlobalVariable ' .. keywords)
+      end
     end
   end
 end
@@ -88,12 +103,14 @@ function M.attach(bufnr, lang)
 
   callbackfn(bufnr);
   -- print("attach")
-  api.nvim_buf_attach(bufnr, false, {on_lines = attachf, on_detach = detachf});
+  api.nvim_buf_attach(bufnr, false, {on_lines = attachf, on_reload=attachf, on_detach = detachf});
 end
 
 function M.detach(bufnr)
-  local detachf = cglobal_state_table[bufnr]
-  detachf()
+  local entry = cglobal_state_table[bufnr]
+  if entry ~= nil then
+    entry.detachf()
+  end
   cglobal_state_table[bufnr] = nil
 end
 
