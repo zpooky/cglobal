@@ -18,3 +18,4 @@ declarator: (init_declarator declarator: (pointer_declarator declarator: (identi
 (declaration type: (struct_specifier name: (type_identifier)) declarator: (identifier) @id)
 (declaration (storage_class_specifier) type: (primitive_type) declarator: (identifier) @id)
 (declaration (storage_class_specifier) type: (struct_specifier name: (type_identifier)) declarator: (init_declarator declarator: (pointer_declarator declarator: (identifier) @id)))
+(declaration (storage_class_specifier) type: (sized_type_specifier) declarator: (identifier) @id)
