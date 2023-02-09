@@ -22,3 +22,5 @@ declarator: (init_declarator declarator: (pointer_declarator declarator: (identi
 (declaration type: (primitive_type) declarator: (init_declarator declarator: (pointer_declarator declarator: (pointer_declarator declarator: (identifier) @id)) value: (null)))
 (declaration (type_qualifier) type: (primitive_type) declarator: (init_declarator declarator: (pointer_declarator declarator: (identifier) @id) value: (null)))
 (declaration type: (primitive_type) declarator: (init_declarator declarator: (pointer_declarator declarator: (identifier) @id) value: (null)))
+(declaration (storage_class_specifier) type: (primitive_type) declarator: (pointer_declarator declarator: (pointer_declarator declarator: (identifier) @id)))
+(declaration (storage_class_specifier) type: (type_identifier) declarator: (pointer_declarator declarator: (pointer_declarator declarator: (identifier) @id)))
