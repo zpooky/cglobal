@@ -29,7 +29,11 @@ declarator: (init_declarator declarator: (pointer_declarator declarator: (identi
 (declaration (storage_class_specifier) type: (primitive_type) declarator: (pointer_declarator declarator: (pointer_declarator declarator: (identifier) @id)))
 (declaration (storage_class_specifier) type: (type_identifier) declarator: (pointer_declarator declarator: (pointer_declarator declarator: (identifier) @id)))
 (declaration type: (struct_specifier name: (type_identifier)) declarator: (init_declarator declarator: (pointer_declarator declarator: (identifier) @id) value: (null)))
-; enum type {
-;   VALUE0,
-; } name;
+; enum type { VALUE0 } name;
 (declaration type: (enum_specifier name: (type_identifier) body: (enumerator_list (enumerator name: (identifier)))) declarator: (identifier) @id)
+; static uint8_t name = STATE;
+(declaration (storage_class_specifier) type: (primitive_type) declarator: (init_declarator declarator: (identifier) @id value: (identifier)))
+; static const int name = CALL(ARG);
+(declaration (storage_class_specifier) (type_qualifier) type: (primitive_type) declarator: (init_declarator declarator: (identifier) @id value: (call_expression function: (identifier) arguments: (argument_list))))
+; static const type name = CALL(ARG);
+(declaration (storage_class_specifier) (type_qualifier) type: (type_identifier) declarator: (init_declarator declarator: (identifier) @id value: (call_expression function: (identifier) arguments: (argument_list))))
