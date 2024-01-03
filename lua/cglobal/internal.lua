@@ -37,7 +37,8 @@ local function callbackfn(bufnr)
   -- executes @id query from cglobal.scm??
   local matches = queries.get_capture_matches(bufnr, "@id", "cglobal")
   for _, node in ipairs(matches) do
-      local txt = vim.treesitter.query.get_node_text(node.node, bufnr)
+      -- local txt = vim.treesitter.query.get_node_text(node.node, bufnr)
+      local txt = vim.treesitter.get_node_text(node.node, bufnr)
       -- print("- "..txt)
     if is_global(node.node) then
       if txt ~= nil and string.len(txt) > 0 then
@@ -98,12 +99,14 @@ local function try_async(f, bufnr)
 end
 
 function M.attach(bufnr, lang)
-  local attachf, detachf = try_async(callbackfn, bufnr);
-  cglobal_state_table[bufnr] = {detachf = detachf, globals = {}}
+  if cglobal_state_table[bufnr] == nil then
+    local attachf, detachf = try_async(callbackfn, bufnr);
+    cglobal_state_table[bufnr] = {detachf = detachf, globals = {}}
 
-  callbackfn(bufnr);
-  -- print("attach")
-  api.nvim_buf_attach(bufnr, false, {on_lines = attachf, on_reload=attachf, on_detach = detachf});
+    callbackfn(bufnr);
+    -- print("attach")
+    api.nvim_buf_attach(bufnr, false, {on_lines = attachf, on_reload=attachf, on_detach = detachf});
+  end
 end
 
 function M.detach(bufnr)
