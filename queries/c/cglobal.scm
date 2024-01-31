@@ -41,3 +41,5 @@ declarator: (init_declarator declarator: (pointer_declarator declarator: (identi
 (declaration (storage_class_specifier) type: (type_identifier) declarator: (init_declarator declarator: (pointer_declarator declarator: (pointer_declarator declarator: (identifier) @id)) value: (null)))
 ; static struct Struct var = { };
 (declaration (storage_class_specifier) type: (struct_specifier name: (type_identifier)) declarator: (init_declarator declarator: (identifier) @id value: (initializer_list)))
+; const struct Struct var = { };
+(declaration (type_qualifier) type: (struct_specifier name: (type_identifier)) declarator: (init_declarator declarator: (identifier) @id value: (initializer_list)))
