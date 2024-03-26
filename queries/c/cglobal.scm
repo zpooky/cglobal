@@ -15,8 +15,6 @@
 (declaration (storage_class_specifier) type: (_) declarator: (init_declarator declarator: (pointer_declarator declarator: (pointer_declarator declarator: (identifier) @id)) value: (null)))
 ; const struct Struct var = { };
 (declaration (type_qualifier) type: (struct_specifier name: (type_identifier)) declarator: (init_declarator declarator: (identifier) @id value: (_)))
-; typedef int/struct Struct (*var)(...);
-(type_definition type: (_) declarator: (function_declarator declarator: (parenthesized_declarator (pointer_declarator declarator: (type_identifier) @id)) parameters: (_)))
 ; struct Struct b2 = {...};
 (declaration type: (struct_specifier name: (type_identifier)) declarator: (init_declarator declarator: (identifier) @id value: (_)))
 ; struct Struct *f2 = ...;
