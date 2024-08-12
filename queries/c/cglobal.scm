@@ -67,3 +67,9 @@
 (declaration type: (_) declarator: (init_declarator declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id size: (_))) value: (_)))
 ; int *var[_];
 (declaration type: (_) declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id size: (_))))
+; static _ *var[] = { ... };
+(declaration (storage_class_specifier) type: (_) declarator: (init_declarator declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id )) value: (_)))
+; _ *var[] = { ... };
+(declaration type: (_) declarator: (init_declarator declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id)) value: (_)))
+; wasd_t (*var0)(void);
+(expression_statement (call_expression function: (call_expression function: (identifier) arguments: (argument_list (pointer_expression argument: (identifier) @id))) arguments: (_)))
