@@ -73,3 +73,12 @@
 (declaration type: (_) declarator: (init_declarator declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id)) value: (_)))
 ; wasd_t (*var0)(void);
 (expression_statement (call_expression function: (call_expression function: (identifier) arguments: (argument_list (pointer_expression argument: (identifier) @id))) arguments: (_)))
+; extern gpio_pin_t a[];
+; extern int *b[];
+(declaration (storage_class_specifier) type: (_) declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id)))
+; static const uint8_t b28[2][4] = {...};
+(declaration (storage_class_specifier) (type_qualifier) type: (_) declarator: (init_declarator declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_)) value: (_)))
+; enum type a[...][...];
+(declaration type: (enum_specifier name: (type_identifier)) declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_)))
+
+; TODO maybe change (type_identifier) to (_)
