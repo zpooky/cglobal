@@ -80,5 +80,7 @@
 (declaration (storage_class_specifier) (type_qualifier) type: (_) declarator: (init_declarator declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_)) value: (_)))
 ; enum type a[...][...];
 (declaration type: (enum_specifier name: (type_identifier)) declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_)))
+; struct resolution_config **a[MAX_NUMBER_OF_SETS];
+(declaration type: (_) declarator: (pointer_declarator declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)))))
 
 ; TODO maybe change (type_identifier) to (_)
