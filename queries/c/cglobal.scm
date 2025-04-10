@@ -78,9 +78,19 @@
 (declaration (storage_class_specifier) type: (_) declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id)))
 ; static const uint8_t b28[2][4] = {...};
 (declaration (storage_class_specifier) (type_qualifier) type: (_) declarator: (init_declarator declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_)) value: (_)))
-; enum type a[...][...];
-(declaration type: (enum_specifier name: (type_identifier)) declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_)))
 ; struct resolution_config **a[MAX_NUMBER_OF_SETS];
 (declaration type: (_) declarator: (pointer_declarator declarator: (pointer_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)))))
+; enum type a[...][...];
+(declaration type: (enum_specifier name: (type_identifier)) declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_)))
+; static char a[...][...];
+(declaration (_) type: (_) declarator: (pointer_declarator declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_))))
+; char a[...][...];
+(declaration type: (_) declarator: (pointer_declarator declarator: (array_declarator declarator: (array_declarator declarator: (identifier) @id size: (_)) size: (_))))
+; int (*a)(...) = ...;
+(declaration type: (_) declarator: (init_declarator declarator: (function_declarator declarator: (parenthesized_declarator (pointer_declarator declarator: (identifier) @id)) parameters: (_)) value: (_)))
+; int *(*a)(...) = ...;
+(declaration type: (_) declarator: (init_declarator declarator: (pointer_declarator declarator: (function_declarator declarator: (parenthesized_declarator (pointer_declarator declarator: (identifier) @id)) parameters: (_))) value: (_)))
+; static double (*a)(void) = ...;
+(declaration (_) type: (_) declarator: (init_declarator declarator: (function_declarator declarator: (parenthesized_declarator (pointer_declarator declarator: (identifier) @id)) parameters: (_)) value: (_)))
 
 ; TODO maybe change (type_identifier) to (_)
