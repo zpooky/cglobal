@@ -36,8 +36,8 @@ vim.api.nvim_create_autocmd('BufUnload', {
     local lib = require 'cglobal'
 
     -- print("BufUnload")
-    local lang = vim.treesitter.language.get_lang(args.match)
-    if not lib.is_supported(lang) then return end
+    -- local lang = vim.treesitter.language.get_lang(args.match)
+    -- if not lib.is_supported(lang) then return end
 
     lib.detach(args.buf)
   end

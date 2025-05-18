@@ -3,7 +3,7 @@ local queries = require "nvim-treesitter.query"
 local M = {}
 
 function M.is_supported(lang)
-  return queries.get_query(lang, 'cglobal') ~= nil
+  return queries.has_query_files(lang, 'cglobal')
 end
 
 function M.attach(bufnr)
