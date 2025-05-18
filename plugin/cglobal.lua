@@ -2,8 +2,20 @@ if vim.g.loaded_cglobal then
   return
 end
 
-local augroup = vim.api.nvim_create_augroup('AugroupCGlobal', {})
+local function define_hlgroups()
+  vim.api.nvim_set_hl(0, 'cGlobalVariable', {default = true, fg = '#cc241c', ctermfg= 'Red'})
+end
 
+define_hlgroups()
+
+local hl_augroup = vim.api.nvim_create_augroup('AugroupCGlobalHL', {})
+vim.api.nvim_create_autocmd('ColorScheme', {
+  desc = 'cglobal ColorScheme',
+  group = hl_augroup,
+  callback = define_hlgroups
+})
+
+local augroup = vim.api.nvim_create_augroup('AugroupCGlobal', {})
 vim.api.nvim_create_autocmd('FileType', {
   desc = 'cglobal Attach',
   group = augroup,
@@ -17,7 +29,6 @@ vim.api.nvim_create_autocmd('FileType', {
     lib.attach(args.buf)
   end,
 })
-
 vim.api.nvim_create_autocmd('BufUnload', {
   desc = 'cgloabl BufUnload',
   group = augroup,
