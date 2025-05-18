@@ -28,18 +28,49 @@ local function key_concat(tab, sep)
 end
 
 local function callbackfn(bufnr)
-  -- TODO? no need to do anything when pum is open
+  -- TODO?
+  -- print(bufnr)
   if vim.fn.pumvisible() == 1 then return; end
   local globals = {}
   local l_globals = 0
   local dirty = false
 
+  -- print("callbackfn")
+  -- queries.invalidate_query_cache("c", "cglobal")
+  -- print("has_query_files: ", queries.has_query_files("c", "cglobal"))
+  -- print("queries:",queries.available_query_groups())
+  -- for key, value in ipairs(queries.available_query_groups()) do
+  --   print(key, ":", value)
+  -- end
+  -- print("get_capture_matches: ")
+  -- for key, value in ipairs(queries.get_capture_matches(bufnr, "@id", "cglobal", nil, "c")) do
+  --   print(key, ":", value)
+  -- end
+  local lang = vim.treesitter.language.get_lang(vim.bo[bufnr].ft)
+  local parser = vim.treesitter.get_parser(bufnr, lang)
+  -- print(type(parser))
+  -- for key, value in pairs(parser) do
+  --   print("-",key, ":", value)
+  -- end
+  parser:invalidate(true)
+  parser:parse()
+
+  -- print("wasd:", vim.treesitter.query.get("c", "cglobal"))
+  -- for key, value in pairs(vim.treesitter.query.get("c", "cglobal")) do
+  --   print("-",key, ":", value)
+  -- end
+  -- for _, match in query:iter_matches(nil, bufnr, start_row, end_row, {all=true}) do
+  --   print("-- ",match)
+  -- end
+
+
   -- executes @id query from cglobal.scm??
   local matches = queries.get_capture_matches(bufnr, "@id", "cglobal")
+  -- print(type(matches))
   for _, node in ipairs(matches) do
-      -- local txt = vim.treesitter.query.get_node_text(node.node, bufnr)
-      local txt = vim.treesitter.get_node_text(node.node, bufnr)
-      -- print("- "..txt)
+    -- local txt = vim.treesitter.query.get_node_text(node.node, bufnr)
+    local txt = vim.treesitter.get_node_text(node.node, bufnr)
+    -- print("- "..txt)
     if is_global(node.node) then
       if txt ~= nil and string.len(txt) > 0 then
         if txt ~= "__packed" and txt ~= "struct" and  txt ~= "typedef" then -- blacklist
@@ -98,15 +129,17 @@ local function try_async(f, bufnr)
   end
 end
 
-function M.attach(bufnr, lang)
-  if cglobal_state_table[bufnr] == nil then
-    local attachf, detachf = try_async(callbackfn, bufnr);
-    cglobal_state_table[bufnr] = {detachf = detachf, globals = {}}
-
-    callbackfn(bufnr);
-    -- print("attach")
-    api.nvim_buf_attach(bufnr, false, {on_lines = attachf, on_reload=attachf, on_detach = detachf});
+function M.attach(bufnr)
+  if cglobal_state_table[bufnr] ~= nil then
+    M.detach(bufnr)
   end
+
+  local attachf, detachf = try_async(callbackfn, bufnr);
+  cglobal_state_table[bufnr] = {detachf = detachf, globals = {}}
+
+  callbackfn(bufnr);
+  -- print("attach")
+  api.nvim_buf_attach(bufnr, false, {on_lines = attachf, on_reload=attachf, on_detach = detachf});
 end
 
 function M.detach(bufnr)
