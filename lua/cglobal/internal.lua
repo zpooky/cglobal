@@ -1,6 +1,5 @@
 local M = {}
 -- local set = require('Module:Set')
-local queries = require "nvim-treesitter.query"
 local api = vim.api
 
 local cglobal_state_table = {}
@@ -27,6 +26,30 @@ local function key_concat(tab, sep)
   return table.concat(ctab, sep)
 end
 
+local function state_changed(old_state, new_state)
+  if old_state == nil then
+    return new_state ~= nil
+  end
+
+  if new_state == nil then
+    return old_state ~= nil
+  end
+
+  for key, _ in pairs(old_state) do
+    if not new_state[key] then
+      return true
+    end
+  end
+
+  for key, _ in pairs(new_state) do
+    if not old_state[key] then
+      return true
+    end
+  end
+
+  return false
+end
+
 local function callbackfn(bufnr)
   -- TODO?
   -- print(bufnr)
@@ -35,69 +58,49 @@ local function callbackfn(bufnr)
   local l_globals = 0
   local dirty = false
 
-  -- print("callbackfn")
-  -- queries.invalidate_query_cache("c", "cglobal")
-  -- print("has_query_files: ", queries.has_query_files("c", "cglobal"))
-  -- print("queries:",queries.available_query_groups())
-  -- for key, value in ipairs(queries.available_query_groups()) do
-  --   print(key, ":", value)
-  -- end
-  -- print("get_capture_matches: ")
-  -- for key, value in ipairs(queries.get_capture_matches(bufnr, "@id", "cglobal", nil, "c")) do
-  --   print(key, ":", value)
-  -- end
   local lang = vim.treesitter.language.get_lang(vim.bo[bufnr].ft)
-  local parser = vim.treesitter.get_parser(bufnr, lang)
-  -- print(type(parser))
-  -- for key, value in pairs(parser) do
-  --   print("-",key, ":", value)
-  -- end
-  parser:invalidate(true)
-  parser:parse()
+  if not lang then
+    return
+  end
 
-  -- print("wasd:", vim.treesitter.query.get("c", "cglobal"))
-  -- for key, value in pairs(vim.treesitter.query.get("c", "cglobal")) do
-  --   print("-",key, ":", value)
-  -- end
-  -- for _, match in query:iter_matches(nil, bufnr, start_row, end_row, {all=true}) do
-  --   print("-- ",match)
-  -- end
+  local ok_query, query = pcall(vim.treesitter.query.get, lang, "cglobal")
+  if not ok_query or not query then
+    return
+  end
 
+  local ok_parser, parser = pcall(vim.treesitter.get_parser, bufnr, lang)
+  if not ok_parser or not parser then
+    return
+  end
 
-  -- executes @id query from cglobal.scm??
-  local matches = queries.get_capture_matches(bufnr, "@id", "cglobal")
-  -- print(type(matches))
-  for _, node in ipairs(matches) do
-    -- local txt = vim.treesitter.query.get_node_text(node.node, bufnr)
-    local txt = vim.treesitter.get_node_text(node.node, bufnr)
-    -- print("- "..txt)
-    if is_global(node.node) then
-      if txt ~= nil and string.len(txt) > 0 then
-        if txt ~= "__packed" and txt ~= "struct" and  txt ~= "typedef" then -- blacklist
-          -- print(": "..txt)
-          if cglobal_state_table[bufnr].globals == nil then
-            dirty = true
-          elseif not dirty and cglobal_state_table[bufnr].globals[txt] == nil then
-            dirty = true
+  for _, tree in ipairs(parser:parse()) do
+    local root = tree:root()
+    local start_row = root:start()
+    local stop_row = select(1, root:end_())
+    for capture_id, node in query:iter_captures(root, bufnr, start_row, stop_row) do
+      if query.captures[capture_id] == "id" then
+        local txt = vim.treesitter.get_node_text(node, bufnr)
+        if is_global(node) then
+          if txt ~= nil and string.len(txt) > 0 then
+            if txt ~= "__packed" and txt ~= "struct" and txt ~= "typedef" then -- blacklist
+              globals[txt] = true
+              l_globals = l_globals + 1
+            end
           end
-          -- print("- "..txt)
-          globals[txt] = true
-          l_globals = l_globals + 1
         end
       end
     end
   end
+
+  local next_globals = l_globals > 0 and globals or nil
+  dirty = state_changed(cglobal_state_table[bufnr].globals, next_globals)
 
   if dirty then
     if cglobal_state_table[bufnr].globals ~= nil then
       -- print("clear")
       api.nvim_command('syntax clear cGlobalVariable');
     end
-    if l_globals > 0 then
-      cglobal_state_table[bufnr].globals = globals
-    else
-      cglobal_state_table[bufnr].globals = nil
-    end
+    cglobal_state_table[bufnr].globals = next_globals
     if l_globals > 0 then
       -- print("add")
       local keywords = key_concat(globals, " ")

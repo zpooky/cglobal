@@ -6,12 +6,7 @@ highlight global variables differently than local variables.
 ```vim
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'zpooky/cglobal'
-
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  cglobal = {
-    enable = true
-  }
-}
-EOF
 ```
+
+`cglobal` loads itself on C filetypes and does not require a
+`nvim-treesitter` module configuration block.
