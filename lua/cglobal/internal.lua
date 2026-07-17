@@ -50,6 +50,18 @@ local function state_changed(old_state, new_state)
   return false
 end
 
+local function safe_get_node_text(node, bufnr)
+  local ok, text = pcall(vim.treesitter.get_node_text, node, bufnr)
+  if ok then
+    return text
+  end
+  return nil
+end
+
+local function is_valid_keyword(txt)
+  return txt:match("^[%w_]+$") ~= nil
+end
+
 local function callbackfn(bufnr)
   -- TODO?
   -- print(bufnr)
@@ -79,9 +91,9 @@ local function callbackfn(bufnr)
     local stop_row = select(1, root:end_())
     for capture_id, node in query:iter_captures(root, bufnr, start_row, stop_row) do
       if query.captures[capture_id] == "id" then
-        local txt = vim.treesitter.get_node_text(node, bufnr)
         if is_global(node) then
-          if txt ~= nil and string.len(txt) > 0 then
+          local txt = safe_get_node_text(node, bufnr)
+          if txt ~= nil and string.len(txt) > 0 and is_valid_keyword(txt) then
             if txt ~= "__packed" and txt ~= "struct" and txt ~= "typedef" then -- blacklist
               globals[txt] = true
               l_globals = l_globals + 1
@@ -107,10 +119,7 @@ local function callbackfn(bufnr)
       -- print(globals)
       -- print(l_globals)
       -- print('syntax keyword cGlobalVariable ' .. keywords)
-      if api.nvim_command('syntax keyword cGlobalVariable ' .. keywords) then
-      else
-        -- print('ERROR: syntax keyword cGlobalVariable ' .. keywords)
-      end
+      pcall(api.nvim_command, 'syntax keyword cGlobalVariable ' .. keywords)
     end
   end
 end
